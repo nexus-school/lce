@@ -53,7 +53,7 @@ add_global_link_arguments(
   '-sERROR_ON_UNDEFINED_SYMBOLS=0',
   '-sASSERTIONS=0',
   '-sFORCE_FILESYSTEM=1',
-  '--preload-file', 'Common',
+  '--preload-file', '../Minecraft.Assets/Common@/Common'
   '-g',
   common_args,
   language: ['c', 'cpp']
