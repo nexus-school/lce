@@ -108,6 +108,11 @@ elif occlusion_mode == 'hardware'
 endif
 
 if host_machine.system() == 'emscripten'
+  add_project_arguments('-sUSE_PTHREADS=1', language: ['c', 'cpp'])
+  add_project_link_arguments('-sUSE_PTHREADS=1', language: ['c', 'cpp'])
+endif
+
+if host_machine.system() == 'emscripten'
   add_global_link_arguments(
     '-sFULL_ES3=1',
     '-sALLOW_MEMORY_GROWTH=1',
