@@ -14,7 +14,8 @@ project(
 )
 
 if host_machine.system() == 'emscripten'
-  atomic_dep = declare_dependency()
+  add_project_arguments('-D__EMSCRIPTEN__', language: ['c', 'cpp'])
+  add_project_arguments('-DNO_ATOMIC', language: ['c', 'cpp'])
 endif
 
 # have to add btw
@@ -36,6 +37,14 @@ global_cpp_defs = [
 
 if host_machine.system() != 'emscripten'
   global_cpp_defs += '-D_LARGE_WORLDS'
+endif
+
+if host_machine.system() == 'emscripten'
+  add_project_link_arguments(
+    '-sUSE_PTHREADS=1',
+    '-sERROR_ON_UNDEFINED_SYMBOLS=0',
+    language: ['c', 'cpp']
+  )
 endif
 
 if host_machine.system() == 'emscripten'
@@ -71,18 +80,28 @@ global_cpp_args = [
 ]
 add_project_arguments(global_cpp_args, language: 'cpp')
 
-# system deps
 if host_machine.system() == 'emscripten'
-  # handled by Emscripten flags
-  sdl2_dep = declare_dependency()
-  zlib_dep = declare_dependency()
-  thread_dep = declare_dependency()
-  dl_dep = declare_dependency()
-else
-  sdl2_dep = dependency('sdl2')
-  zlib_dep = dependency('zlib')
-  thread_dep = dependency('threads')
-  dl_dep = cc.find_library('dl', required: true)
+  # compiler flags
+  add_project_arguments(
+    '-D__EMSCRIPTEN__',
+    '-DNO_ATOMIC',
+    '-DMA_NO_ALSA',
+    language: ['c', 'cpp']
+  )
+
+  # linker flags (THIS is where -s flags belong)
+  add_project_link_arguments(
+    '-sUSE_PTHREADS=1',
+    '-sFULL_ES3=1',
+    '-sALLOW_MEMORY_GROWTH=1',
+    '-sPTHREAD_POOL_SIZE=4',
+    '-sERROR_ON_UNDEFINED_SYMBOLS=0',
+    '-sASSERTIONS=0',
+    '-sFORCE_FILESYSTEM=1',
+    '--use-port=zlib',
+    '--use-port=sdl2',
+    language: ['c', 'cpp']
+  )
 endif
 
 # GLES vs Desktop GL
@@ -105,7 +124,6 @@ stb_dep = declare_dependency(include_directories: stb)
 miniaudio_dep = dependency(
   'miniaudio',
   fallback: ['miniaudio', 'miniaudio_dep'],
-  default_options: ['atomic=false']
 )
 subdir('4J.Render')
 subdir('4J.Input')
