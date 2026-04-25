@@ -6,39 +6,23 @@ project(
   default_options: [
     'cpp_std=c++23',
     'warning_level=0',
-    'buildtype=debug', # for now
-    'unity=on', # merge source files per target
-    'unity_size=8', # TODO: mess around with this
-    'b_pch=true', # precompiled headers
+    'buildtype=debug',
+    'unity=on',
+    'unity_size=8',
+    'b_pch=true',
   ],
 )
-
-if host_machine.system() == 'emscripten'
-  add_project_arguments('-D__EMSCRIPTEN__', language: ['c', 'cpp'])
-  add_project_arguments('-DNO_ATOMIC', language: ['c', 'cpp'])
-endif
-
-# have to add btw
 
 pymod = import('python')
 python = pymod.find_installation('python3', required: true)
 
 cc = meson.get_compiler('cpp')
 
-if host_machine.system() == 'emscripten'
-  sdl2_dep = declare_dependency()
-  zlib_dep = declare_dependency()
-  thread_dep = declare_dependency()
-  dl_dep = declare_dependency()
-else
-  sdl2_dep = dependency('sdl2')
-  zlib_dep = dependency('zlib')
-  thread_dep = dependency('threads')
-  dl_dep = cc.find_library('dl', required: true)
-endif
-
 use_gles = get_option('renderer') == 'gles'
 
+# =========================
+# GLOBAL DEFINES
+# =========================
 global_cpp_defs = [
   '-DSPLIT_SAVES',
   '-D_EXTENDED_ACHIEVEMENTS',
@@ -51,30 +35,6 @@ if host_machine.system() != 'emscripten'
   global_cpp_defs += '-D_LARGE_WORLDS'
 endif
 
-if host_machine.system() == 'emscripten'
-  add_project_link_arguments(
-    '-sUSE_PTHREADS=1',
-    '-sERROR_ON_UNDEFINED_SYMBOLS=0',
-    language: ['c', 'cpp']
-  )
-endif
-
-if host_machine.system() == 'emscripten'
-  common_args = [
-    '-sUSE_PTHREADS=1',
-    '--use-port=zlib',
-    '--use-port=sdl2',
-  ]
-
-  add_global_arguments(
-    '-DMA_NO_ALSA',
-    common_args,
-    language: ['c', 'cpp']
-  )
-endif
-  
-
-# DecalOverdose: yes i know it's bad to do this but I don't know a better way to do this.
 if host_machine.system() == 'linux' or host_machine.system() == 'emscripten'
   global_cpp_defs += ['-Dlinux', '-D__linux', '-D__linux__']
 endif
@@ -92,6 +52,9 @@ global_cpp_args = [
 ]
 add_project_arguments(global_cpp_args, language: 'cpp')
 
+# =========================
+# EMSCRIPTEN (CLEAN + CORRECT)
+# =========================
 if host_machine.system() == 'emscripten'
   # compiler flags
   add_project_arguments(
@@ -101,7 +64,7 @@ if host_machine.system() == 'emscripten'
     language: ['c', 'cpp']
   )
 
-  # linker flags (THIS is where -s flags belong)
+  # linker flags (ONLY defined ONCE here)
   add_project_link_arguments(
     '-sUSE_PTHREADS=1',
     '-sFULL_ES3=1',
@@ -112,38 +75,58 @@ if host_machine.system() == 'emscripten'
     '-sFORCE_FILESYSTEM=1',
     '--use-port=zlib',
     '--use-port=sdl2',
-    '--preload-file=' + meson.project_source_root() + '/Minecraft.Assets/Common@/Common',
+
+    # 🔥 THIS is what creates .data
+    '--preload-file=' + meson.project_source_root() + '/Minecraft.Assets@/',
+
     language: ['c', 'cpp']
   )
+
+  # override atomic (fixes -latomic issue)
+  meson.override_dependency('atomic', declare_dependency())
+
+  # fake deps (handled by emscripten)
+  sdl2_dep = declare_dependency()
+  zlib_dep = declare_dependency()
+  thread_dep = declare_dependency()
+  dl_dep = declare_dependency()
+
+else
+  sdl2_dep = dependency('sdl2')
+  zlib_dep = dependency('zlib')
+  thread_dep = dependency('threads')
+  dl_dep = cc.find_library('dl', required: true)
 endif
 
-# GLES vs Desktop GL
+# =========================
+# GRAPHICS
+# =========================
 if use_gles
   if host_machine.system() != 'emscripten'
     gl_dep = dependency('glesv2', required: true)
   else
     gl_dep = declare_dependency()
   endif
-
   glu_dep = dependency('', required: false)
 else
   gl_dep = dependency('gl', required: true)
   glu_dep = dependency('glu', required: true)
 endif
 
+# =========================
+# SUBPROJECTS
+# =========================
 stb = subproject('stb').get_variable('stb_inc')
 stb_dep = declare_dependency(include_directories: stb)
 
-# 🔥 ADD THIS RIGHT HERE
-if host_machine.system() == 'emscripten'
-  meson.override_dependency('atomic', declare_dependency())
-endif
-
 miniaudio_dep = dependency(
   'miniaudio',
-  fallback: ['miniaudio', 'miniaudio'],
+  fallback: ['miniaudio', 'miniaudio_dep'],  # ✅ FIXED
 )
 
+# =========================
+# MODULES
+# =========================
 subdir('4J.Render')
 subdir('4J.Input')
 subdir('4J.Profile')
