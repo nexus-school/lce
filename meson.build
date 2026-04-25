@@ -138,10 +138,9 @@ if host_machine.system() == 'emscripten'
   meson.override_dependency('atomic', declare_dependency())
 endif
 
-miniaudio_dep = dependency(
-  'miniaudio',
-  fallback: ['miniaudio', 'miniaudio_dep'],
-)
+miniaudio_proj = subproject('miniaudio')
+miniaudio_dep = miniaudio_proj.get_variable('miniaudio')
+
 subdir('4J.Render')
 subdir('4J.Input')
 subdir('4J.Profile')
