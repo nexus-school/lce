@@ -39,11 +39,11 @@ if host_machine.system() != 'emscripten'
 endif
 
 if host_machine.system() == 'emscripten'
-  common_args = [
-    '-pthread',
-    '--use-port=zlib',
-    '--use-port=sdl2',
-  ]
+common_args = [
+  '-sUSE_PTHREADS=1',
+  '--use-port=zlib',
+  '--use-port=sdl2',
+]
 
   add_global_arguments(
     '-DMA_NO_ALSA',
