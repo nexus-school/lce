@@ -54,7 +54,7 @@ add_global_link_arguments(
   '-sASSERTIONS=0',
   '-sFORCE_FILESYSTEM=1',
 
-  '--preload-file=' + meson.project_source_root() + '/Minecraft.Assets/Common@/Common'
+  '--preload-file=Minecraft.Assets/Common@/Common',
 
   '-g',
 
