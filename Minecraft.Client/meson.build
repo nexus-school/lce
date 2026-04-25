@@ -131,7 +131,7 @@ endif
     '-sERROR_ON_UNDEFINED_SYMBOLS=0',
     '-sASSERTIONS=0',
     '-sFORCE_FILESYSTEM=1',
-    '--preload-file=Minecraft.Assets/Common@/Common',
+    '--preload-file=' + join_paths(meson.project_source_root(), 'Minecraft.Assets/Common') + '@/Common',
     '-g',
   ] : [],
 
