@@ -13,6 +13,8 @@ project(
   ],
 )
 
+# have to add btw
+
 pymod = import('python')
 python = pymod.find_installation('python3', required: true)
 
