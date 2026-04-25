@@ -53,9 +53,10 @@ global_cpp_args = [
 add_project_arguments(global_cpp_args, language: 'cpp')
 
 # =========================
-# EMSCRIPTEN (CLEAN + CORRECT)
+# EMSCRIPTEN FIX (REAL FIX)
 # =========================
 if host_machine.system() == 'emscripten'
+
   # compiler flags
   add_project_arguments(
     '-D__EMSCRIPTEN__',
@@ -64,7 +65,7 @@ if host_machine.system() == 'emscripten'
     language: ['c', 'cpp']
   )
 
-  # linker flags (ONLY defined ONCE here)
+  # linker flags
   add_project_link_arguments(
     '-sUSE_PTHREADS=1',
     '-sFULL_ES3=1',
@@ -73,23 +74,32 @@ if host_machine.system() == 'emscripten'
     '-sERROR_ON_UNDEFINED_SYMBOLS=0',
     '-sASSERTIONS=0',
     '-sFORCE_FILESYSTEM=1',
+
     '--use-port=zlib',
     '--use-port=sdl2',
 
-    # 🔥 THIS is what creates .data
+    # 🔥 THIS creates Minecraft.Client.data
     '--preload-file=' + meson.project_source_root() + '/Minecraft.Assets@/',
 
     language: ['c', 'cpp']
   )
 
-  # override atomic (fixes -latomic issue)
-  meson.override_dependency('atomic', declare_dependency())
+  # 🔥 FIX SDL include (THIS is what broke your build)
+  sdl_include = include_directories(
+    '/emsdk/upstream/emscripten/cache/sysroot/include'
+  )
 
-  # fake deps (handled by emscripten)
-  sdl2_dep = declare_dependency()
+  sdl2_dep = declare_dependency(
+    include_directories: sdl_include
+  )
+
+  # fake deps (handled by emscripten ports)
   zlib_dep = declare_dependency()
   thread_dep = declare_dependency()
   dl_dep = declare_dependency()
+
+  # fix atomic
+  meson.override_dependency('atomic', declare_dependency())
 
 else
   sdl2_dep = dependency('sdl2')
@@ -121,7 +131,7 @@ stb_dep = declare_dependency(include_directories: stb)
 
 miniaudio_dep = dependency(
   'miniaudio',
-  fallback: ['miniaudio', 'miniaudio_dep'],  # ✅ FIXED
+  fallback: ['miniaudio', 'miniaudio_dep'],
 )
 
 # =========================
