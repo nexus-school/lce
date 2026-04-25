@@ -53,7 +53,7 @@ global_cpp_args = [
 add_project_arguments(global_cpp_args, language: 'cpp')
 
 # =========================
-# EMSCRIPTEN FIX (FINAL)
+# EMSCRIPTEN FIX (ACTUAL FINAL)
 # =========================
 if host_machine.system() == 'emscripten'
 
@@ -66,7 +66,7 @@ if host_machine.system() == 'emscripten'
     language: ['c', 'cpp']
   )
 
-  # linker flags (ONLY place this is defined)
+  # linker flags
   add_project_link_arguments(
     '-sUSE_PTHREADS=1',
     '-sFULL_ES3=1',
@@ -76,23 +76,24 @@ if host_machine.system() == 'emscripten'
     '-sASSERTIONS=0',
     '-sFORCE_FILESYSTEM=1',
 
-    '--use-port=zlib',
+    # ✅ THIS is the correct SDL enable
     '-sUSE_SDL=2',
 
-    # 🔥 generates Minecraft.Client.data
+    '--use-port=zlib',
+
+    # data file
     '--preload-file=' + meson.project_source_root() + '/Minecraft.Assets@/',
 
     language: ['c', 'cpp']
   )
 
+  # ✅ IMPORTANT: define sdl2_dep even if empty
+  sdl2_dep = declare_dependency()
 
-
-  # fake deps (handled by emscripten)
   zlib_dep = declare_dependency()
   thread_dep = declare_dependency()
   dl_dep = declare_dependency()
 
-  # fix atomic linking issue
   meson.override_dependency('atomic', declare_dependency())
 
 else
