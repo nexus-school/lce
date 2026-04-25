@@ -10,10 +10,10 @@ input_sources = files(
 lib_input = static_library('4J_Input',
   input_sources,
   include_directories : include_directories('.'),
-cpp_args : [
-  '-include', meson.current_source_dir() / 'stdafx.h',
-],
-
+  cpp_args : [
+    '-include', meson.current_source_dir() / 'stdafx.h',
+  ],
+)
 # We import SDL2 but not SDL3.. which is a bit sad,
 if host_machine.system() == 'emscripten'
     sdl_dep = declare_dependency()
