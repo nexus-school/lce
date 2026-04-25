@@ -13,6 +13,10 @@ project(
   ],
 )
 
+if host_machine.system() == 'emscripten'
+  atomic_dep = declare_dependency()
+endif
+
 # have to add btw
 
 pymod = import('python')
@@ -98,8 +102,11 @@ endif
 stb = subproject('stb').get_variable('stb_inc')
 stb_dep = declare_dependency(include_directories: stb)
 
-miniaudio_dep = dependency('miniaudio')
-
+miniaudio_dep = dependency(
+  'miniaudio',
+  fallback: ['miniaudio', 'miniaudio_dep'],
+  default_options: ['atomic=false']
+)
 subdir('4J.Render')
 subdir('4J.Input')
 subdir('4J.Profile')
