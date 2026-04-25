@@ -53,7 +53,7 @@ global_cpp_args = [
 add_project_arguments(global_cpp_args, language: 'cpp')
 
 # =========================
-# EMSCRIPTEN FIX (REAL FIX)
+# EMSCRIPTEN FIX (FINAL)
 # =========================
 if host_machine.system() == 'emscripten'
 
@@ -62,10 +62,11 @@ if host_machine.system() == 'emscripten'
     '-D__EMSCRIPTEN__',
     '-DNO_ATOMIC',
     '-DMA_NO_ALSA',
+    '-DSDL_MAIN_HANDLED',
     language: ['c', 'cpp']
   )
 
-  # linker flags
+  # linker flags (ONLY place this is defined)
   add_project_link_arguments(
     '-sUSE_PTHREADS=1',
     '-sFULL_ES3=1',
@@ -78,27 +79,28 @@ if host_machine.system() == 'emscripten'
     '--use-port=zlib',
     '--use-port=sdl2',
 
-    # 🔥 THIS creates Minecraft.Client.data
+    # 🔥 generates Minecraft.Client.data
     '--preload-file=' + meson.project_source_root() + '/Minecraft.Assets@/',
 
     language: ['c', 'cpp']
   )
 
-  # 🔥 FIX SDL include (THIS is what broke your build)
-  sdl_include = include_directories(
-    '/emsdk/upstream/emscripten/cache/sysroot/include'
-  )
+  # 🔥 FIX SDL2 include properly (supports <SDL2/SDL.h>)
+  sdl_root = '/emsdk/upstream/emscripten/cache/sysroot/include'
 
   sdl2_dep = declare_dependency(
-    include_directories: sdl_include
+    include_directories: [
+      include_directories(sdl_root),
+      include_directories(sdl_root + '/SDL')
+    ]
   )
 
-  # fake deps (handled by emscripten ports)
+  # fake deps (handled by emscripten)
   zlib_dep = declare_dependency()
   thread_dep = declare_dependency()
   dl_dep = declare_dependency()
 
-  # fix atomic
+  # fix atomic linking issue
   meson.override_dependency('atomic', declare_dependency())
 
 else
