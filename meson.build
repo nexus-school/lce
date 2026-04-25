@@ -25,6 +25,18 @@ python = pymod.find_installation('python3', required: true)
 
 cc = meson.get_compiler('cpp')
 
+if host_machine.system() == 'emscripten'
+  sdl2_dep = declare_dependency()
+  zlib_dep = declare_dependency()
+  thread_dep = declare_dependency()
+  dl_dep = declare_dependency()
+else
+  sdl2_dep = dependency('sdl2')
+  zlib_dep = dependency('zlib')
+  thread_dep = dependency('threads')
+  dl_dep = cc.find_library('dl', required: true)
+endif
+
 use_gles = get_option('renderer') == 'gles'
 
 global_cpp_defs = [
