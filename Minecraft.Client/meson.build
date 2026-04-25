@@ -1,12 +1,11 @@
 exclude_sources = [
-  ' ! -path "*/Platform/*"', # added by platform_sources
+  ' ! -path "*/Platform/*"',
   ' ! -name "SurvivalMode.cpp"',
   ' ! -name "CreativeMode.cpp"',
   ' ! -name "GameMode.cpp"',
   ' ! -name "DemoMode.cpp"',
 ]
 
-# all sources except ./Platform/*
 client_sources = run_command(
   'sh',
   '-c', 'find "'
@@ -16,7 +15,6 @@ client_sources = run_command(
   check: true,
 ).stdout().strip().split('\n')
 
-# all sources in ./Platform (top-level files only)
 platform_sources = run_command(
   'sh',
   '-c', 'find "'
@@ -25,7 +23,6 @@ platform_sources = run_command(
   check: true,
 ).stdout().strip().split('\n')
 
-# some platform-specific sources that are for some stupid reason in Common
 exclude_platform_common_sources = [
   ' ! -path "*/Network/Sony/*"',
   ' ! -path "*/XUI/*"',
@@ -33,7 +30,6 @@ exclude_platform_common_sources = [
   ' ! -name "UIScene_InGameSaveManagementMenu.cpp"',
 ]
 
-# all sources in in ./Platform/Common
 platform_sources += run_command(
   'sh',
   '-c', 'find "'
@@ -43,7 +39,6 @@ platform_sources += run_command(
   check: true,
 ).stdout().strip().split('\n')
 
-# linux-specific files (everything in Platform/Linux)
 if host_machine.system() == 'linux' or host_machine.system() == 'emscripten'
   platform_sources += run_command(
     'sh',
@@ -75,7 +70,7 @@ if get_option('enable_vsync')
 endif
 
 if get_option('classic_panorama')
-    global_cpp_defs += '-DCLASSIC_PANORAMA'
+  global_cpp_defs += '-DCLASSIC_PANORAMA'
 endif
 
 if get_option('enable_frame_profiler')
@@ -108,16 +103,31 @@ elif occlusion_mode == 'hardware'
 endif
 
 
+# ✅ FIX: define link args properly
+emscripten_link_args = []
+
+if host_machine.system() == 'emscripten'
+  emscripten_link_args += [
+    '--preload-file=' + meson.project_source_root() + '/Minecraft.Assets@/'
+  ]
+endif
+
+
 client = executable(
   'Minecraft.Client',
   client_sources + platform_sources + localisation[1],
-  name_suffix: (host_machine.system() == 'emscripten') ? 'html' : '',
-  include_directories: include_directories('Platform', 'Platform/Linux/Iggy/include'),
+
+  name_suffix: host_machine.system() == 'emscripten' ? 'html' : '',
+
+  include_directories: include_directories(
+    'Platform',
+    'Platform/Linux/Iggy/include'
+  ),
+
   dependencies: client_dependencies,
 
-  link_args: host_machine.system() == 'emscripten' ? [
-    '--preload-file=' + meson.project_source_root() + '/Minecraft.Assets/Common@/Common'
-  ] : [],
+  # ✅ FIXED: always applied correctly
+  link_args: emscripten_link_args,
 
   cpp_args: global_cpp_args
   + global_cpp_defs
@@ -133,13 +143,11 @@ client = executable(
   install_dir: '',
 )
 
-# To support actually running the client from the build folder, we need to
-# copy the generated assets from Minecraft.Assets into the working directory
-# of the client.
+
 custom_target(
   'copy_assets_to_client',
   input: [client, media_archive],
-  output: 'assets.stamp', # using a stamp file to avoid copying assets every time
+  output: 'assets.stamp',
   command: [
     python,
     meson.project_source_root() / 'scripts/copy_assets_to_client.py',
