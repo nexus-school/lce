@@ -69,7 +69,7 @@ add_project_arguments(global_cpp_args, language: 'cpp')
 
 # system deps
 if host_machine.system() == 'emscripten'
-    # These are handled in Emscripten via -sUSE_<whatever>
+  # handled by Emscripten flags
   sdl2_dep = declare_dependency()
   zlib_dep = declare_dependency()
   thread_dep = declare_dependency()
