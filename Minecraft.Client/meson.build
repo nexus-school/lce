@@ -107,21 +107,6 @@ elif occlusion_mode == 'hardware'
   global_cpp_defs += ['-DOCCLUSION_MODE_HARDWARE', '-DUSE_OCCLUSION_CULLING']
 endif
 
-if host_machine.system() == 'emscripten'
-  add_global_link_arguments(
-    '-sFULL_ES3=1',
-    '-sALLOW_MEMORY_GROWTH=1',
-    '-sPTHREAD_POOL_SIZE=4',
-    '-sERROR_ON_UNDEFINED_SYMBOLS=0',
-    '-sASSERTIONS=0',
-    '-sFORCE_FILESYSTEM=1',
-
-    '--preload-file=' + join_paths(meson.project_source_root(), 'Minecraft.Assets', 'Common') + '@/Common',
-
-    '-g',
-    language: ['c', 'cpp']
-  )
-endif
 
 client = executable(
   'Minecraft.Client',
