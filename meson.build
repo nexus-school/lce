@@ -46,17 +46,18 @@ if host_machine.system() == 'emscripten'
     language: ['c', 'cpp']
   )
 
-  add_global_link_arguments(
-    '-sFULL_ES3=1',
-    '-sALLOW_MEMORY_GROWTH=1',
-    '-sPTHREAD_POOL_SIZE=4',
-    '-sERROR_ON_UNDEFINED_SYMBOLS=0',
-    '-sASSERTIONS=0',
-    '-sFORCE_FILESYSTEM=1',
-    '-g',
-    common_args,
-    language: ['c', 'cpp']
-  )
+add_global_link_arguments(
+  '-sFULL_ES3=1',
+  '-sALLOW_MEMORY_GROWTH=1',
+  '-sPTHREAD_POOL_SIZE=4',
+  '-sERROR_ON_UNDEFINED_SYMBOLS=0',
+  '-sASSERTIONS=0',
+  '-sFORCE_FILESYSTEM=1',
+  '--preload-file', 'Common',
+  '-g',
+  common_args,
+  language: ['c', 'cpp']
+)
 endif
 
 # DecalOverdose: yes i know it's bad to do this but I don't know a better way to do this.
