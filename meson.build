@@ -86,12 +86,6 @@ if host_machine.system() == 'emscripten'
   )
 
 
-  sdl2_dep = declare_dependency(
-    include_directories: [
-      include_directories(sdl_root),
-      include_directories(sdl_root + '/SDL')
-    ]
-  )
 
   # fake deps (handled by emscripten)
   zlib_dep = declare_dependency()
