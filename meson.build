@@ -7,8 +7,10 @@ project(
     'cpp_std=c++23',
     'warning_level=0',
     'buildtype=debug',
-    'unity=on',
-    'unity_size=8',
+
+    # 🔥 TURN OFF (debugging clarity)
+    'unity=off',
+
     'b_pch=true',
   ],
 )
@@ -45,58 +47,67 @@ endif
 
 add_project_arguments(global_cpp_defs, language: ['cpp', 'c'])
 
-global_cpp_args = [
-  '-fpermissive',
-  '-Wshift-count-overflow',
-  '-pipe',
-]
-add_project_arguments(global_cpp_args, language: 'cpp')
+add_project_arguments(
+  [
+    '-fpermissive',
+    '-Wshift-count-overflow',
+    '-pipe',
+  ],
+  language: 'cpp'
+)
 
 # =========================
-# EMSCRIPTEN FIX (ACTUAL FINAL)
+# EMSCRIPTEN CONFIG (CLEAN)
 # =========================
 if host_machine.system() == 'emscripten'
 
-  # compiler flags
+  # 🔧 compile flags
   add_project_arguments(
-    '-D__EMSCRIPTEN__',
-    '-DNO_ATOMIC',
-    '-DMA_NO_ALSA',
-    '-DSDL_MAIN_HANDLED',
+    [
+      '-D__EMSCRIPTEN__',
+      '-DNO_ATOMIC',
+      '-DMA_NO_ALSA',
+      '-DMA_NO_WEBAUDIO',   # 🔥 avoids miniaudio JS issues
+      '-DSDL_MAIN_HANDLED',
+
+      # 🔥 REQUIRED for real SDL
+      '-sUSE_SDL=2',
+    ],
     language: ['c', 'cpp']
   )
 
-  # linker flags
+  # 🔗 linker flags
   add_project_link_arguments(
-    '-sUSE_PTHREADS=1',
-    '-sFULL_ES3=1',
-    '-sALLOW_MEMORY_GROWTH=1',
-    '-sPTHREAD_POOL_SIZE=4',
-    '-sERROR_ON_UNDEFINED_SYMBOLS=0',
-    '-sASSERTIONS=0',
-    '-sFORCE_FILESYSTEM=1',
+    [
+      '-sUSE_SDL=2',
+      '-sUSE_PTHREADS=1',
+      '-sPTHREAD_POOL_SIZE=4',
+      '-sFULL_ES3=1',
+      '-sALLOW_MEMORY_GROWTH=1',
+      '-sERROR_ON_UNDEFINED_SYMBOLS=0',
+      '-sASSERTIONS=0',
+      '-sFORCE_FILESYSTEM=1',
 
-    # ✅ THIS is the correct SDL enable
-    '-sUSE_SDL=2',
+      '--use-port=zlib',
 
-    '--use-port=zlib',
-
-    # data file
-    '--preload-file=' + meson.project_source_root() + '/Minecraft.Assets@/',
-
+      # 🔥 FIXED preload (split args)
+      '--preload-file',
+      meson.project_source_root() + '/Minecraft.Assets@/',
+    ],
     language: ['c', 'cpp']
   )
 
-  # ✅ IMPORTANT: define sdl2_dep even if empty
+  # deps handled by emscripten
   sdl2_dep = declare_dependency()
-
   zlib_dep = declare_dependency()
   thread_dep = declare_dependency()
   dl_dep = declare_dependency()
 
+  # fix atomic linker issues
   meson.override_dependency('atomic', declare_dependency())
 
 else
+  # native build
   sdl2_dep = dependency('sdl2')
   zlib_dep = dependency('zlib')
   thread_dep = dependency('threads')
