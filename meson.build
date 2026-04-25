@@ -34,7 +34,6 @@ endif
 
 if host_machine.system() == 'emscripten'
   common_args = [
-    '-sMEMORY64=1',
     '-pthread',
     '--use-port=zlib',
     '--use-port=sdl2',
