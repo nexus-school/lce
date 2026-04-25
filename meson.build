@@ -133,6 +133,11 @@ endif
 stb = subproject('stb').get_variable('stb_inc')
 stb_dep = declare_dependency(include_directories: stb)
 
+# 🔥 ADD THIS RIGHT HERE
+if host_machine.system() == 'emscripten'
+  meson.override_dependency('atomic', declare_dependency())
+endif
+
 miniaudio_dep = dependency(
   'miniaudio',
   fallback: ['miniaudio', 'miniaudio_dep'],
