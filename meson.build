@@ -45,6 +45,7 @@ if host_machine.system() == 'emscripten'
     common_args,
     language: ['c', 'cpp']
   )
+endif
   
 
 # DecalOverdose: yes i know it's bad to do this but I don't know a better way to do this.
