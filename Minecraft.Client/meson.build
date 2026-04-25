@@ -123,17 +123,20 @@ endif
 
   c_args: global_cpp_defs + ['-DUNICODE', '-D_UNICODE'],
 
-  # 👇 ADD THIS BLOCK RIGHT HERE
-  link_args: host_machine.system() == 'emscripten' ? [
-    '-sFULL_ES3=1',
-    '-sALLOW_MEMORY_GROWTH=1',
-    '-sPTHREAD_POOL_SIZE=4',
-    '-sERROR_ON_UNDEFINED_SYMBOLS=0',
-    '-sASSERTIONS=0',
-    '-sFORCE_FILESYSTEM=1',
-    '--preload-file=' + join_paths(meson.project_source_root(), 'Minecraft.Assets/Common') + '@/Common',
-    '-g',
-  ] : [],
+link_args: host_machine.system() == 'emscripten' ? [
+  '-mwasm64',  # ← ADD THIS
+
+  '-sFULL_ES3=1',
+  '-sALLOW_MEMORY_GROWTH=1',
+  '-sPTHREAD_POOL_SIZE=4',
+  '-sERROR_ON_UNDEFINED_SYMBOLS=0',
+  '-sASSERTIONS=0',
+  '-sFORCE_FILESYSTEM=1',
+
+  '--preload-file=' + join_paths(meson.project_source_root(), 'Minecraft.Assets/Common') + '@/Common',
+
+  '-g'
+] : [],
 
   install: true,
   install_dir: '',
