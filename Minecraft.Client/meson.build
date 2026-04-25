@@ -96,6 +96,17 @@ if get_option('ui_backend') == 'java'
   global_cpp_defs += '-DENABLE_JAVA_GUIS'
 endif
 
+occlusion_mode = get_option('occlusion_culling')
+if occlusion_mode == 'off'
+  global_cpp_defs += ['-DOCCLUSION_MODE_NONE']
+elif occlusion_mode == 'frustum'
+  global_cpp_defs += ['-DOCCLUSION_MODE_FRUSTUM']
+elif occlusion_mode == 'bfs'
+  global_cpp_defs += ['-DOCCLUSION_MODE_BFS', '-DUSE_OCCLUSION_CULLING']
+elif occlusion_mode == 'hardware'
+  global_cpp_defs += ['-DOCCLUSION_MODE_HARDWARE', '-DUSE_OCCLUSION_CULLING']
+endif
+
 if host_machine.system() == 'emscripten'
   add_global_link_arguments(
     '-sFULL_ES3=1',
@@ -110,17 +121,6 @@ if host_machine.system() == 'emscripten'
     '-g',
     language: ['c', 'cpp']
   )
-endif
-
-occlusion_mode = get_option('occlusion_culling')
-if occlusion_mode == 'off'
-  global_cpp_defs += ['-DOCCLUSION_MODE_NONE']
-elif occlusion_mode == 'frustum'
-  global_cpp_defs += ['-DOCCLUSION_MODE_FRUSTUM']
-elif occlusion_mode == 'bfs'
-  global_cpp_defs += ['-DOCCLUSION_MODE_BFS', '-DUSE_OCCLUSION_CULLING']
-elif occlusion_mode == 'hardware'
-  global_cpp_defs += ['-DOCCLUSION_MODE_HARDWARE', '-DUSE_OCCLUSION_CULLING']
 endif
 
 client = executable(
