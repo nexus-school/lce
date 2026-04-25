@@ -106,7 +106,7 @@ elif occlusion_mode == 'bfs'
 elif occlusion_mode == 'hardware'
   global_cpp_defs += ['-DOCCLUSION_MODE_HARDWARE', '-DUSE_OCCLUSION_CULLING']
 endif
-  client = executable(
+client = executable(
   'Minecraft.Client',
   client_sources + platform_sources + localisation[1],
   name_suffix: (host_machine.system() == 'emscripten') ? 'html' : '',
@@ -123,20 +123,18 @@ endif
 
   c_args: global_cpp_defs + ['-DUNICODE', '-D_UNICODE'],
 
-link_args: host_machine.system() == 'emscripten' ? [
-  '-mwasm64',  # ← ADD THIS
+  link_args: [
+    '-sFULL_ES3=1',
+    '-sALLOW_MEMORY_GROWTH=1',
+    '-sPTHREAD_POOL_SIZE=4',
+    '-sERROR_ON_UNDEFINED_SYMBOLS=0',
+    '-sASSERTIONS=0',
+    '-sFORCE_FILESYSTEM=1',
 
-  '-sFULL_ES3=1',
-  '-sALLOW_MEMORY_GROWTH=1',
-  '-sPTHREAD_POOL_SIZE=4',
-  '-sERROR_ON_UNDEFINED_SYMBOLS=0',
-  '-sASSERTIONS=0',
-  '-sFORCE_FILESYSTEM=1',
+    '--preload-file=' + join_paths(meson.project_source_root(), 'Minecraft.Assets', 'Common') + '@/Common',
 
-  '--preload-file=' + join_paths(meson.project_source_root(), 'Minecraft.Assets', 'Common') + '@/Common',
-
-  '-g'
-] : [],
+    '-g'
+  ],
 
   install: true,
   install_dir: '',
