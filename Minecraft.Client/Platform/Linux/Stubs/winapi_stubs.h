@@ -257,12 +257,12 @@ static inline void GlobalMemoryStatus(LPMEMORYSTATUS lpBuffer) {
 
 static inline DWORD GetLastError(void) { return errno; }
 
-static inline LONG InterlockedCompareExchangeRelease(
-    volatile LONG* Destination,
-    LONG Exchange,
-    LONG Comperand)
+static inline int32_t InterlockedCompareExchangeRelease(
+    volatile int32_t* Destination,
+    int32_t Exchange,
+    int32_t Comperand)
 {
-    LONG expected = Comperand;
+    int32_t expected = Comperand;
     __atomic_compare_exchange_n(Destination, &expected, Exchange, false,
                                __ATOMIC_RELEASE, __ATOMIC_RELAXED);
     return expected;
