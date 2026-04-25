@@ -77,7 +77,7 @@ if host_machine.system() == 'emscripten'
     '-sFORCE_FILESYSTEM=1',
 
     '--use-port=zlib',
-    '--use-port=sdl2',
+    '-sUSE_SDL=2',
 
     # 🔥 generates Minecraft.Client.data
     '--preload-file=' + meson.project_source_root() + '/Minecraft.Assets@/',
@@ -85,8 +85,6 @@ if host_machine.system() == 'emscripten'
     language: ['c', 'cpp']
   )
 
-  # 🔥 FIX SDL2 include properly (supports <SDL2/SDL.h>)
-  sdl_root = '/emsdk/upstream/emscripten/cache/sysroot/include'
 
   sdl2_dep = declare_dependency(
     include_directories: [
