@@ -257,24 +257,27 @@ static inline void GlobalMemoryStatus(LPMEMORYSTATUS lpBuffer) {
 
 static inline DWORD GetLastError(void) { return errno; }
 
-#ifdef __LP64__
-static inline int64_t InterlockedCompareExchangeRelease64(
-    int64_t volatile* Destination, int64_t Exchange, int64_t Comperand) {
-    int64_t expected = Comperand;
-    __atomic_compare_exchange_n(Destination, &expected, Exchange, false,
-                                __ATOMIC_RELEASE, __ATOMIC_RELAXED);
-    return expected;
-}
-#else
-static inline int64_t InterlockedCompareExchangeRelease(
-    LONG volatile* Destination, LONG Exchange, LONG Comperand) {
+static inline LONG InterlockedCompareExchangeRelease(
+    volatile LONG* Destination,
+    LONG Exchange,
+    LONG Comperand)
+{
     LONG expected = Comperand;
     __atomic_compare_exchange_n(Destination, &expected, Exchange, false,
-                                __ATOMIC_RELEASE, __ATOMIC_RELAXED);
+                               __ATOMIC_RELEASE, __ATOMIC_RELAXED);
     return expected;
 }
-#endif
 
+static inline int64_t InterlockedCompareExchangeRelease64(
+    volatile int64_t* Destination,
+    int64_t Exchange,
+    int64_t Comperand)
+{
+    int64_t expected = Comperand;
+    __atomic_compare_exchange_n(Destination, &expected, Exchange, false,
+                               __ATOMIC_RELEASE, __ATOMIC_RELAXED);
+    return expected;
+}
 // internal helper: convert time_t to FILETIME (100ns intervals since
 // 1601-01-01)
 static inline FILETIME _TimeToFileTime(time_t t) {
