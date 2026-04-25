@@ -115,6 +115,10 @@ client = executable(
   include_directories: include_directories('Platform', 'Platform/Linux/Iggy/include'),
   dependencies: client_dependencies,
 
+  link_args: host_machine.system() == 'emscripten' ? [
+    '--preload-file=' + meson.project_source_root() + '/Minecraft.Assets/Common@/Common'
+  ] : [],
+
   cpp_args: global_cpp_args
   + global_cpp_defs
   + [
