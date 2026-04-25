@@ -6,7 +6,7 @@
 
 #include <GL/gl.h>
 #include <GL/glext.h>
-#include <SDL2/SDL.h>
+#include <SDL.h>
 #include <string.h>
 #include <math.h>
 #include <stdio.h>
