@@ -112,7 +112,7 @@ if host_machine.system() == 'emscripten'
     '-sFORCE_FILESYSTEM=1',
     '--use-port=zlib',
     '--use-port=sdl2',
-    '--preload-file=' + meson.project_source_root() + '/Minecraft.Assets/Common@/Common',
+    '--preload-file=' + meson.project_source_root() + './Minecraft.Assets/Common@/Common',
     language: ['c', 'cpp']
   )
 endif
